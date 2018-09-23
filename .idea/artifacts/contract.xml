@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="contract">
+    <output-path>$PROJECT_DIR$/out/artifacts/contract</output-path>
+    <root id="root">
+      <element id="archive" name="contract.jar">
+        <element id="module-output" name="nuls-lottery-smartcontract" />
+      </element>
+    </root>
+  </artifact>
+</component>
