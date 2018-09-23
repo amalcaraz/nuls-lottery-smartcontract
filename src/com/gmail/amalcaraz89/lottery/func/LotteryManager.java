@@ -7,6 +7,7 @@ import com.gmail.amalcaraz89.lottery.event.SupportTransferEvent;
 import com.gmail.amalcaraz89.lottery.event.TicketsBoughtEvent;
 import com.gmail.amalcaraz89.lottery.model.Lottery;
 import com.gmail.amalcaraz89.lottery.model.LotteryResult;
+import com.gmail.amalcaraz89.lottery.model.LotteryResume;
 import com.gmail.amalcaraz89.lottery.model.Ticket;
 import io.nuls.contract.sdk.Address;
 import io.nuls.contract.sdk.Block;
@@ -26,7 +27,7 @@ public class LotteryManager implements LotteryManagerInterface {
     private static long rescueMinWait = 1000L * 60 * 60 * 24 * 30;
     private static int defaultMinParticipants = 5;
     private Address owner;
-    private Map<Long, Lottery> lotteryList = new HashMap<Long, Lottery>();
+    private Map<Long, Lottery> lotteryMap = new HashMap<Long, Lottery>();
 
     public LotteryManager(Address owner) {
         this.owner = owner;
@@ -43,7 +44,7 @@ public class LotteryManager implements LotteryManagerInterface {
         require(endTime >= Block.timestamp(), "end time cant't be lower than now");
         require(minParticipants >= defaultMinParticipants, "Minimum participants is 5");
 
-        Long lotteryId = Long.valueOf(lotteryList.size() + 1);
+        Long lotteryId = Long.valueOf(lotteryMap.size() + 1);
         Lottery lottery = new Lottery();
 
         lottery.setId(lotteryId);
@@ -54,7 +55,7 @@ public class LotteryManager implements LotteryManagerInterface {
         lottery.setStartTime(startTime);
         lottery.setEndTime(endTime);
         lottery.setSecondPrizes(secondPrizes);
-        lottery.setTicketList(new HashMap<Long, Ticket>());
+        lottery.setTicketMap(new HashMap<Long, Ticket>());
 
         if (supportAddress != null) {
 
@@ -68,7 +69,7 @@ public class LotteryManager implements LotteryManagerInterface {
             lottery.setTotalPot(value);
         }
 
-        this.lotteryList.put(lotteryId, lottery);
+        this.lotteryMap.put(lotteryId, lottery);
         emit(new NewLotteryEvent(lotteryId, lottery));
 
         return lottery;
@@ -79,9 +80,10 @@ public class LotteryManager implements LotteryManagerInterface {
 
         Lottery lottery = this.getLotteryById(lotteryId);
 
-        this.checkStatus(lottery);
+        this.updateStatus(lottery);
 
-        require(lottery.getStatus() == LotteryStatus.OPEN, "This lottery is not open");
+        require(lottery.getStatus() != LotteryStatus.WAITING, "This lottery is not open yet");
+        require(lottery.getStatus() != LotteryStatus.CLOSE, "This lottery is already closed");
 
         BigInteger ticketPrice = lottery.getTicketPrice();
 
@@ -107,11 +109,48 @@ public class LotteryManager implements LotteryManagerInterface {
     }
 
     @Override
-    public boolean claimPrizes(long lotteryId) {
+    public void claimPrizes(long lotteryId) {
 
         Lottery lottery = this.getLotteryById(lotteryId);
 
-        return this.checkStatus(lottery);
+        // Require transition from WAITING or OPEN to CLOSE
+
+        require(lottery.getStatus() != LotteryStatus.CLOSE, "This lottery is already closed");
+
+        this.updateStatus(lottery);
+
+        require(lottery.getStatus() == LotteryStatus.CLOSE, "This lottery is not closed yet");
+
+        this.resolveWinners(lottery);
+
+    }
+
+    @Override
+    public List<LotteryResume> getLotteryList() {
+
+        List<LotteryResume> lotteryResumes = new ArrayList<LotteryResume>();
+
+        for (long i = 1; i <= this.lotteryMap.size(); i++) {
+            Lottery lottery = this.lotteryMap.get(i);
+            LotteryResume resume = new LotteryResume();
+
+            resume.setId(lottery.getId());
+            resume.setTitle(lottery.getTitle());
+            resume.setDesc(lottery.getDesc());
+            resume.setStatus(lottery.getStatus());
+            resume.setMinParticipants(lottery.getMinParticipants());
+            resume.setStartTime(lottery.getStartTime());
+            resume.setEndTime(lottery.getEndTime());
+            resume.setTotalPot(lottery.getTotalPot());
+            resume.setTicketPrice(lottery.getTicketPrice());
+            resume.setSecondPrizes(lottery.isSecondPrizes());
+            resume.setSupportAddress(lottery.getSupportAddress());
+            resume.setSupportPercentage(lottery.getSupportPercentage());
+
+            lotteryResumes.add(resume);
+        }
+
+        return lotteryResumes;
     }
 
     @Override
@@ -119,12 +158,12 @@ public class LotteryManager implements LotteryManagerInterface {
 
         Lottery lottery = this.getLotteryById(lotteryId);
 
-        require(lottery.getStatus() == LotteryStatus.CLOSE, "This lottery is still open");
+        require(lottery.getStatus() == LotteryStatus.CLOSE, "This lottery is not closed yet");
 
         LotteryResult result = new LotteryResult();
         result.setId(lotteryId);
 
-        Map<Long, Ticket> ticketMap = lottery.getTicketList();
+        Map<Long, Ticket> ticketMap = lottery.getTicketMap();
 
         List<Ticket> tickets = new ArrayList<Ticket>();
 
@@ -152,7 +191,7 @@ public class LotteryManager implements LotteryManagerInterface {
 
         Lottery lottery = this.getLotteryById(lotteryId);
 
-        Map<Long, Ticket> ticketMap = lottery.getTicketList();
+        Map<Long, Ticket> ticketMap = lottery.getTicketMap();
 
         List<Ticket> tickets = new ArrayList<Ticket>();
 
@@ -168,7 +207,7 @@ public class LotteryManager implements LotteryManagerInterface {
 
         Lottery lottery = this.getLotteryById(lotteryId);
 
-        Map<Long, Ticket> ticketMap = lottery.getTicketList();
+        Map<Long, Ticket> ticketMap = lottery.getTicketMap();
 
         List<Ticket> tickets = new ArrayList<Ticket>();
 
@@ -187,7 +226,7 @@ public class LotteryManager implements LotteryManagerInterface {
 
         Lottery lottery = this.getLotteryById(lotteryId);
 
-        Map<Long, Ticket> ticketMap = lottery.getTicketList();
+        Map<Long, Ticket> ticketMap = lottery.getTicketMap();
 
         Ticket ticket = ticketMap.get(ticketId);
 
@@ -203,8 +242,8 @@ public class LotteryManager implements LotteryManagerInterface {
 
         Lottery lottery = this.getLotteryById(lotteryId);
 
-        require(lottery.getStatus() == LotteryStatus.CLOSE, "This lottery is not close");
-        require(Block.timestamp() >= (lottery.getEndTime() + rescueMinWait), "Can't rescue balance till: " + (lottery.getEndTime() + rescueMinWait));
+        require(lottery.getStatus() == LotteryStatus.CLOSE, "This lottery is not closed yet");
+        require(Block.timestamp() >= (lottery.getEndTime() + rescueMinWait), "Can't rescue balance till time = " + (lottery.getEndTime() + rescueMinWait));
 
         BigInteger pot = lottery.getTotalPot();
         require(pot.compareTo(BigInteger.ZERO) > 0 && pot.compareTo(Msg.address().balance()) <= 0, "Not enough balance to rescue");
@@ -217,7 +256,7 @@ public class LotteryManager implements LotteryManagerInterface {
 
         require(lotteryId > 0L, "Lottery id should be greater than 0");
 
-        Lottery lottery = this.lotteryList.get(lotteryId);
+        Lottery lottery = this.lotteryMap.get(lotteryId);
         require(lottery != null, "Lottery not found by id");
 
         return lottery;
@@ -226,7 +265,7 @@ public class LotteryManager implements LotteryManagerInterface {
 
     private void generateTickets(Lottery lottery, Address address, int  numTickets) {
 
-        Map<Long, Ticket> ticketMap = lottery.getTicketList();
+        Map<Long, Ticket> ticketMap = lottery.getTicketMap();
         List<Ticket> tickets = new ArrayList<Ticket>();
 
         int next = ticketMap.size() + 1;
@@ -241,33 +280,19 @@ public class LotteryManager implements LotteryManagerInterface {
 
     }
 
-    private boolean checkStatus(Lottery lottery) {
+    private void updateStatus(Lottery lottery) {
 
-
-        if (lottery.getStartTime() > Block.timestamp()) {
-
-            return false;
-
-        } else if (lottery.getStatus() == LotteryStatus.WAITING) {
+        if (lottery.getStartTime() <= Block.timestamp() && lottery.getStatus() == LotteryStatus.WAITING) {
 
             lottery.setStatus(LotteryStatus.OPEN);
 
         }
 
-        if (lottery.getEndTime() < Block.timestamp()) {
+        if (lottery.getEndTime() <= Block.timestamp() && lottery.getStatus() != LotteryStatus.CLOSE) {
 
-            if (lottery.getStatus() != LotteryStatus.CLOSE) {
-
-                this.resolveWinners(lottery);
-                lottery.setStatus(LotteryStatus.CLOSE);
-
-            }
-
-            return false;
+            lottery.setStatus(LotteryStatus.CLOSE);
 
         }
-
-        return true;
 
     }
 
@@ -279,9 +304,7 @@ public class LotteryManager implements LotteryManagerInterface {
     //
     private void resolveWinners(Lottery lottery) {
 
-        require(lottery.getStatus() == LotteryStatus.OPEN, "This lottery is not open");
-
-        Map<Long, Ticket> ticketMap = lottery.getTicketList();
+        Map<Long, Ticket> ticketMap = lottery.getTicketMap();
 
         long numTickets = ticketMap.size();
 
@@ -318,6 +341,8 @@ public class LotteryManager implements LotteryManagerInterface {
             totalPot = totalPot.subtract(supportAmount);
 
             supportAddress.transfer(supportAmount);
+            lottery.setTotalPot(lottery.getTotalPot().subtract(supportAmount));
+
             emit(new SupportTransferEvent(lottery.getId(), supportAddress, supportAmount));
 
         }
@@ -336,7 +361,7 @@ public class LotteryManager implements LotteryManagerInterface {
             this.setWinnerTicket(lottery, secondPrizeTicket, 2, secondPrizeAmount);
 
 
-            long thirdWinnerIndex = ((secondWinnerIndex << 24) % numTickets) + 1;
+            long thirdWinnerIndex = ((secondWinnerIndex << 1) % numTickets) + 1;
             while (thirdWinnerIndex == winnerIndex || thirdWinnerIndex == secondWinnerIndex) {
                 thirdWinnerIndex = (++thirdWinnerIndex % numTickets) + 1;
             }
@@ -372,7 +397,7 @@ public class LotteryManager implements LotteryManagerInterface {
         Map<Address, List<Ticket>> ownersTickets = new HashMap<Address, List<Ticket>>();
         List<Address> owners = new ArrayList<Address>();
 
-        for (int i = 1; i <= numTickets; i++) {
+        for (long i = 1; i <= numTickets; i++) {
 
             Ticket ticket = ticketMap.get(i);
             Address owner = ticket.getOwner();
@@ -385,7 +410,8 @@ public class LotteryManager implements LotteryManagerInterface {
 
             ownerTickets.add(ticket);
 
-            if (!owners.contains(owner)) {
+            // List.contains() not supported
+            if (!this.containsAddress(owners, owner)) {
                 owners.add(owner);
             }
         }
@@ -401,6 +427,15 @@ public class LotteryManager implements LotteryManagerInterface {
 
         }
 
+    }
+
+    private boolean containsAddress(List<Address> list, Address o) {
+        for (int i = 0; i< list.size(); i++) {
+            if (list.get(i) == o) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

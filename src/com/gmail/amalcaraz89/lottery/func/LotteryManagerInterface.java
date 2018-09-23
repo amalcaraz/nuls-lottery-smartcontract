@@ -2,6 +2,7 @@ package com.gmail.amalcaraz89.lottery.func;
 
 import com.gmail.amalcaraz89.lottery.model.Lottery;
 import com.gmail.amalcaraz89.lottery.model.LotteryResult;
+import com.gmail.amalcaraz89.lottery.model.LotteryResume;
 import com.gmail.amalcaraz89.lottery.model.Ticket;
 import io.nuls.contract.sdk.Address;
 
@@ -15,9 +16,11 @@ public interface LotteryManagerInterface {
 
     BigInteger buyTickets(long lotteryId, Address address, BigInteger deposit);
 
-    boolean claimPrizes(long lotteryId);
+    void claimPrizes(long lotteryId);
 
     void rescueNuls(long lotteryId, Address receiver);
+
+    List<LotteryResume> getLotteryList();
 
     LotteryResult getLotteryResult(long lotteryId);
 

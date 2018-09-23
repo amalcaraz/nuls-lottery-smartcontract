@@ -4,6 +4,7 @@ import com.gmail.amalcaraz89.lottery.func.LotteryManager;
 import com.gmail.amalcaraz89.lottery.func.LotteryManagerInterface;
 import com.gmail.amalcaraz89.lottery.model.Lottery;
 import com.gmail.amalcaraz89.lottery.model.LotteryResult;
+import com.gmail.amalcaraz89.lottery.model.LotteryResume;
 import com.gmail.amalcaraz89.lottery.model.Ticket;
 import io.nuls.contract.sdk.Address;
 import io.nuls.contract.sdk.Contract;
@@ -53,9 +54,16 @@ public class LotteryContract implements Contract {
     }
 
     @Payable
-    public boolean claimPrizes(@Required long lotteryId) {
+    public void claimPrizes(@Required long lotteryId) {
 
-        return this.lotteryManager.claimPrizes(lotteryId);
+        this.lotteryManager.claimPrizes(lotteryId);
+
+    }
+
+    @View
+    public List<LotteryResume> viewLotteryList() {
+
+        return this.lotteryManager.getLotteryList();
 
     }
 
