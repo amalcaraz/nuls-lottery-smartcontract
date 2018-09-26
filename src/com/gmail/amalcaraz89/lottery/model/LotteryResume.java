@@ -14,11 +14,34 @@ public class LotteryResume {
     protected int minParticipants;
     protected long startTime;
     protected long endTime;
+    protected BigInteger initialPot = BigInteger.ZERO;
+    protected BigInteger currentPot = BigInteger.ZERO;
     protected BigInteger totalPot = BigInteger.ZERO;
     protected BigInteger ticketPrice;
     protected boolean secondPrizes;
+    protected Address creatorAddress;
     protected Address supportAddress;
     protected int supportPercentage;
+
+    public LotteryResume() {}
+
+    public LotteryResume(LotteryResume obj) {
+        this.id = obj.getId();
+        this.title = obj.getTitle();
+        this.desc = obj.getDesc();
+        this.status = obj.getStatus();
+        this.minParticipants = obj.getMinParticipants();
+        this.startTime = obj.getStartTime();
+        this.endTime = obj.getEndTime();
+        this.initialPot = obj.getInitialPot();
+        this.currentPot = obj.getCurrentPot();
+        this.totalPot = obj.getTotalPot();
+        this.ticketPrice = obj.getTicketPrice();
+        this.secondPrizes = obj.isSecondPrizes();
+        this.creatorAddress = obj.getCreatorAddress();
+        this.supportAddress = obj.getSupportAddress();
+        this.supportPercentage = obj.getSupportPercentage();
+    }
 
     public Long getId() {
         return id;
@@ -64,21 +87,29 @@ public class LotteryResume {
 
     public void setEndTime(long endTime) { this.endTime = endTime; }
 
-    public BigInteger getTotalPot() {
-        return totalPot;
-    }
+    public BigInteger getInitialPot() { return initialPot; }
+
+    public void setInitialPot(BigInteger initialPot) { this.initialPot = initialPot; }
+
+    public BigInteger getCurrentPot() { return currentPot; }
+
+    public void setCurrentPot(BigInteger currentPot) { this.currentPot = currentPot; }
+
+    public BigInteger getTotalPot() { return totalPot; }
 
     public void setTotalPot(BigInteger totalPot) { this.totalPot = totalPot; }
 
-    public BigInteger getTicketPrice() {
-        return ticketPrice;
-    }
+    public BigInteger getTicketPrice() { return ticketPrice; }
 
     public void setTicketPrice(BigInteger ticketPrice) { this.ticketPrice = ticketPrice; }
 
     public boolean isSecondPrizes() { return secondPrizes; }
 
     public void setSecondPrizes(boolean secondPrizes) { this.secondPrizes = secondPrizes; }
+
+    public Address getCreatorAddress() { return creatorAddress; }
+
+    public void setCreatorAddress(Address creatorAddress) { this.creatorAddress = creatorAddress; }
 
     public Address getSupportAddress() { return supportAddress; }
 
@@ -102,9 +133,12 @@ public class LotteryResume {
         if (minParticipants != that.minParticipants) return false;
         if (startTime != that.startTime) return false;
         if (endTime != that.endTime) return false;
+        if (initialPot != null ? initialPot.equals(that.initialPot) : that.initialPot == null) return false;
+        if (currentPot != null ? currentPot.equals(that.currentPot) : that.currentPot == null) return false;
         if (totalPot != null ? totalPot.equals(that.totalPot) : that.totalPot == null) return false;
         if (ticketPrice != null ? ticketPrice.equals(that.ticketPrice) : that.ticketPrice == null) return false;
         if (secondPrizes != that.secondPrizes) return false;
+        if (creatorAddress != null ? creatorAddress.equals(that.creatorAddress) : that.creatorAddress == null) return false;
         if (supportAddress != null ? supportAddress.equals(that.supportAddress) : that.supportAddress == null) return false;
         if (supportPercentage != that.supportPercentage) return false;
 
@@ -120,9 +154,12 @@ public class LotteryResume {
         result = 31 * result + minParticipants;
         result = 31 * result + (int) (startTime ^ (startTime >>> 32));
         result = 31 * result + (int) (endTime ^ (endTime >>> 32));
+        result = 31 * result + (initialPot != null ? initialPot.hashCode() : 0);
+        result = 31 * result + (currentPot != null ? currentPot.hashCode() : 0);
         result = 31 * result + (totalPot != null ? totalPot.hashCode() : 0);
         result = 31 * result + (ticketPrice != null ? ticketPrice.hashCode() : 0);
         result = 31 * result + (secondPrizes ? 1 : 0);
+        result = 31 * result + (creatorAddress != null ? creatorAddress.hashCode() : 0);
         result = 31 * result + (supportAddress != null ? supportAddress.hashCode() : 0);
         result = 31 * result + supportPercentage;
 
@@ -139,9 +176,12 @@ public class LotteryResume {
                 ", minParticipants: " + minParticipants +
                 ", startTime: " + startTime  +
                 ", endTime: " + endTime  +
+                ", initialPot: " + initialPot +
+                ", currentPot: " + currentPot +
                 ", totalPot: " + totalPot +
                 ", ticketPrice: " + ticketPrice +
                 ", secondPrizes: " + secondPrizes +
+                ", creatorAddress: \"" + creatorAddress + "\"" +
                 ", supportAddress: \"" + supportAddress + "\"" +
                 ", supportPercentage: " + supportPercentage +
                 '}';

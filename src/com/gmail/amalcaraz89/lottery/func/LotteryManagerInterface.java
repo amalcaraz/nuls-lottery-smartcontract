@@ -12,7 +12,7 @@ import java.util.List;
 public interface LotteryManagerInterface {
 
     Lottery createLottery(String title, String desc, BigInteger ticketPrice, long startTime, long endTime, BigInteger value,
-                   int minParticipants, boolean secondPrizes, Address supportAddress, int supportPercentage);
+                   int minParticipants, boolean secondPrizes, Address creatorAddress, Address supportAddress, int supportPercentage);
 
     BigInteger buyTickets(long lotteryId, Address address, BigInteger deposit);
 
@@ -28,7 +28,7 @@ public interface LotteryManagerInterface {
 
     List<Ticket> getTicketList(long lotteryId);
 
-    List<Ticket> getTicketList(long lotteryId, Address sender);
+    List<Ticket> getTicketList(long lotteryId, Address owner);
 
     Ticket getTicketDetails(long lotteryId, long ticketId);
 

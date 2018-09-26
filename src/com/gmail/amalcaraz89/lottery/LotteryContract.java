@@ -18,6 +18,7 @@ import java.util.List;
 
 public class LotteryContract implements Contract {
 
+    private final String name = "Smart Lottery v1.0.0";
     private LotteryManagerInterface lotteryManager;
 
     public LotteryContract() { this.lotteryManager = new LotteryManager(Msg.sender()); }
@@ -39,7 +40,7 @@ public class LotteryContract implements Contract {
         BigInteger ticketPriceInt = BigInteger.valueOf((long) (ticketPrice * 100000000));
         BigInteger value = Msg.value();
 
-        return this.lotteryManager.createLottery(title, desc, ticketPriceInt, startTime, endTime, value, minParticipants, secondPrizes, supportAddress, supportPercentage);
+        return this.lotteryManager.createLottery(title, desc, ticketPriceInt, startTime, endTime, value, minParticipants, secondPrizes, Msg.sender(), supportAddress, supportPercentage);
 
     }
 
@@ -100,6 +101,11 @@ public class LotteryContract implements Contract {
 
         return this.lotteryManager.getTicketDetails(lotteryId, ticketId);
 
+    }
+
+    @View
+    public String name() {
+        return name;
     }
 
     @Payable

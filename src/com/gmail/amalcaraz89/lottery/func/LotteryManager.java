@@ -1,6 +1,7 @@
 package com.gmail.amalcaraz89.lottery.func;
 
 import com.gmail.amalcaraz89.lottery.event.TicketsRefundEvent;
+import com.gmail.amalcaraz89.lottery.event.InitialPotRefund;
 import com.gmail.amalcaraz89.lottery.event.NewLotteryEvent;
 import com.gmail.amalcaraz89.lottery.event.LotteryWinnerEvent;
 import com.gmail.amalcaraz89.lottery.event.SupportTransferEvent;
@@ -35,7 +36,7 @@ public class LotteryManager implements LotteryManagerInterface {
 
     @Override
     public Lottery createLottery(String title, String desc, BigInteger ticketPrice, long startTime, long endTime, BigInteger value,
-                                 int minParticipants, boolean secondPrizes, Address supportAddress, int supportPercentage) {
+                                 int minParticipants, boolean secondPrizes, Address creatorAddress, Address supportAddress, int supportPercentage) {
 
         require(title != null, "title can not be empty");
         require(desc != null, "desc can not be empty");
@@ -43,6 +44,7 @@ public class LotteryManager implements LotteryManagerInterface {
         require(startTime <= endTime, "start time should be lower than end time");
         require(endTime >= Block.timestamp(), "end time cant't be lower than now");
         require(minParticipants >= defaultMinParticipants, "Minimum participants is 5");
+        require(creatorAddress != null, "creator address can not be empty");
 
         Long lotteryId = Long.valueOf(lotteryMap.size() + 1);
         Lottery lottery = new Lottery();
@@ -55,6 +57,7 @@ public class LotteryManager implements LotteryManagerInterface {
         lottery.setStartTime(startTime);
         lottery.setEndTime(endTime);
         lottery.setSecondPrizes(secondPrizes);
+        lottery.setCreatorAddress(creatorAddress);
         lottery.setTicketMap(new HashMap<Long, Ticket>());
 
         if (supportAddress != null) {
@@ -65,8 +68,9 @@ public class LotteryManager implements LotteryManagerInterface {
             lottery.setSupportPercentage(supportPercentage);
         }
 
-        if (value.compareTo(BigInteger.ZERO) >= 0) {
-            lottery.setTotalPot(value);
+        if (value.compareTo(BigInteger.ZERO) > 0) {
+            lottery.setInitialPot(value);
+            this.increasePot(lottery, value);
         }
 
         this.lotteryMap.put(lotteryId, lottery);
@@ -77,6 +81,8 @@ public class LotteryManager implements LotteryManagerInterface {
 
     @Override
     public BigInteger buyTickets(long lotteryId, Address sender, BigInteger value) {
+
+        require(sender != null, "sender can not be empty");
 
         Lottery lottery = this.getLotteryById(lotteryId);
 
@@ -96,7 +102,7 @@ public class LotteryManager implements LotteryManagerInterface {
         require(spent.add(remainder).equals(value), "Error calculating bought tickets");
 
         if (spent.compareTo(BigInteger.ZERO) > 0) {
-            lottery.setTotalPot(lottery.getTotalPot().add(spent));
+            this.increasePot(lottery, spent);
             this.generateTickets(lottery, sender, tickets.intValue());
         }
 
@@ -132,21 +138,7 @@ public class LotteryManager implements LotteryManagerInterface {
 
         for (long i = 1; i <= this.lotteryMap.size(); i++) {
             Lottery lottery = this.lotteryMap.get(i);
-            LotteryResume resume = new LotteryResume();
-
-            resume.setId(lottery.getId());
-            resume.setTitle(lottery.getTitle());
-            resume.setDesc(lottery.getDesc());
-            resume.setStatus(lottery.getStatus());
-            resume.setMinParticipants(lottery.getMinParticipants());
-            resume.setStartTime(lottery.getStartTime());
-            resume.setEndTime(lottery.getEndTime());
-            resume.setTotalPot(lottery.getTotalPot());
-            resume.setTicketPrice(lottery.getTicketPrice());
-            resume.setSecondPrizes(lottery.isSecondPrizes());
-            resume.setSupportAddress(lottery.getSupportAddress());
-            resume.setSupportPercentage(lottery.getSupportPercentage());
-
+            LotteryResume resume = new LotteryResume(lottery);
             lotteryResumes.add(resume);
         }
 
@@ -203,7 +195,9 @@ public class LotteryManager implements LotteryManagerInterface {
     }
 
     @Override
-    public List<Ticket> getTicketList(long lotteryId, final Address address) {
+    public List<Ticket> getTicketList(long lotteryId, final Address owner) {
+
+        require(owner != null, "owner can not be empty");
 
         Lottery lottery = this.getLotteryById(lotteryId);
 
@@ -213,7 +207,7 @@ public class LotteryManager implements LotteryManagerInterface {
 
         for (long i = 1; i <= ticketMap.size(); i++) {
             Ticket t = ticketMap.get(i);
-            if (address.equals(t.getOwner())) {
+            if (owner.equals(t.getOwner())) {
                 tickets.add(t);
             }
         }
@@ -223,6 +217,8 @@ public class LotteryManager implements LotteryManagerInterface {
 
     @Override
     public Ticket getTicketDetails(long lotteryId, long ticketId) {
+
+        require(ticketId > 0, "ticketId can not be empty or 0");
 
         Lottery lottery = this.getLotteryById(lotteryId);
 
@@ -238,14 +234,14 @@ public class LotteryManager implements LotteryManagerInterface {
     @Override
     public void rescueNuls(long lotteryId, Address receiver) {
 
-        require(receiver.equals(this.owner), "Only owner can rescue the balance");
+        require(receiver != null && receiver.equals(this.owner), "Only owner can rescue the balance");
 
         Lottery lottery = this.getLotteryById(lotteryId);
 
         require(lottery.getStatus() == LotteryStatus.CLOSE, "This lottery is not closed yet");
         require(Block.timestamp() >= (lottery.getEndTime() + rescueMinWait), "Can't rescue balance till time = " + (lottery.getEndTime() + rescueMinWait));
 
-        BigInteger pot = lottery.getTotalPot();
+        BigInteger pot = lottery.getCurrentPot();
         require(pot.compareTo(BigInteger.ZERO) > 0 && pot.compareTo(Msg.address().balance()) <= 0, "Not enough balance to rescue");
 
         receiver.transfer(pot);
@@ -263,7 +259,7 @@ public class LotteryManager implements LotteryManagerInterface {
     }
 
 
-    private void generateTickets(Lottery lottery, Address address, int  numTickets) {
+    private void generateTickets(Lottery lottery, Address address, int numTickets) {
 
         Map<Long, Ticket> ticketMap = lottery.getTicketMap();
         List<Ticket> tickets = new ArrayList<Ticket>();
@@ -332,16 +328,18 @@ public class LotteryManager implements LotteryManagerInterface {
         long winnerIndex = (long) (CustomMath.random(seed) * numTickets) + 1;
         Ticket ticket = ticketMap.get(winnerIndex);
 
-        BigInteger totalPot = lottery.getTotalPot();
+        BigInteger totalPot = lottery.getCurrentPot();
+        BigInteger firstPrizeAmount = totalPot;
+
         Address supportAddress = lottery.getSupportAddress();
 
         if (supportAddress != null) {
 
             BigInteger supportAmount = BigInteger.valueOf(lottery.getSupportPercentage()).multiply(totalPot).divide(BigInteger.valueOf(100));
-            totalPot = totalPot.subtract(supportAmount);
+            firstPrizeAmount = firstPrizeAmount.subtract(supportAmount);
 
             supportAddress.transfer(supportAmount);
-            lottery.setTotalPot(lottery.getTotalPot().subtract(supportAmount));
+            this.decreasePot(lottery, supportAmount);
 
             emit(new SupportTransferEvent(lottery.getId(), supportAddress, supportAmount));
 
@@ -355,7 +353,7 @@ public class LotteryManager implements LotteryManagerInterface {
             }
 
             BigInteger secondPrizeAmount = BigInteger.valueOf(25).multiply(totalPot).divide(BigInteger.valueOf(100));
-            totalPot = totalPot.subtract(secondPrizeAmount);
+            firstPrizeAmount = firstPrizeAmount.subtract(secondPrizeAmount);
 
             Ticket secondPrizeTicket = ticketMap.get(secondWinnerIndex);
             this.setWinnerTicket(lottery, secondPrizeTicket, 2, secondPrizeAmount);
@@ -367,21 +365,21 @@ public class LotteryManager implements LotteryManagerInterface {
             }
 
             BigInteger thirdPrizeAmount = BigInteger.valueOf(10).multiply(totalPot).divide(BigInteger.valueOf(100));
-            totalPot = totalPot.subtract(thirdPrizeAmount);
+            firstPrizeAmount = firstPrizeAmount.subtract(thirdPrizeAmount);
 
             Ticket thirdPrizeTicket = ticketMap.get(thirdWinnerIndex);
             this.setWinnerTicket(lottery, thirdPrizeTicket, 3, thirdPrizeAmount);
 
         }
 
-        this.setWinnerTicket(lottery, ticket, 1, totalPot);
+        this.setWinnerTicket(lottery, ticket, 1, firstPrizeAmount);
 
     }
 
     private void setWinnerTicket(Lottery lottery, Ticket ticket, int prize, BigInteger amount) {
 
         ticket.getOwner().transfer(amount);
-        lottery.setTotalPot(lottery.getTotalPot().subtract(amount));
+        this.decreasePot(lottery, amount);
         ticket.setPrize(prize);
         ticket.setPrizeAmount(amount);
 
@@ -411,31 +409,43 @@ public class LotteryManager implements LotteryManagerInterface {
             ownerTickets.add(ticket);
 
             // List.contains() not supported
-            if (!this.containsAddress(owners, owner)) {
+            if (!Utils.containsAddress(owners, owner)) {
                 owners.add(owner);
             }
         }
 
         for (int i = 0; i < owners.size(); i++) {
+
             Address owner = owners.get(i);
             List<Ticket> tickets = ownersTickets.get(owner);
             BigInteger amount = lottery.getTicketPrice().multiply(BigInteger.valueOf(tickets.size()));
             owner.transfer(amount);
-            lottery.setTotalPot(lottery.getTotalPot().subtract(amount));
+            this.decreasePot(lottery, amount);
 
             emit(new TicketsRefundEvent(lottery.getId(), amount, tickets));
 
         }
 
+        BigInteger initialPot = lottery.getInitialPot();
+
+        if (initialPot.compareTo(BigInteger.ZERO) > 0 && lottery.getCurrentPot().compareTo(initialPot) >= 0) {
+
+            lottery.getCreatorAddress().transfer(initialPot);
+            this.decreasePot(lottery, initialPot);
+
+            emit(new InitialPotRefund(lottery.getId(), initialPot));
+
+        }
+
     }
 
-    private boolean containsAddress(List<Address> list, Address o) {
-        for (int i = 0; i< list.size(); i++) {
-            if (list.get(i) == o) {
-                return true;
-            }
-        }
-        return false;
+    private void increasePot(Lottery lottery, BigInteger amount) {
+        lottery.setTotalPot(lottery.getTotalPot().add(amount));
+        lottery.setCurrentPot(lottery.getCurrentPot().add(amount));
+    }
+
+    private void decreasePot(Lottery lottery, BigInteger amount) {
+        lottery.setCurrentPot(lottery.getCurrentPot().subtract(amount));
     }
 
 }
