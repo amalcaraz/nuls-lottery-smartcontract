@@ -304,17 +304,13 @@ public class LotteryManager implements LotteryManagerInterface {
 
         long numTickets = ticketMap.size();
 
-        if (numTickets > 0) {
+        if (numTickets >= lottery.getMinParticipants()) {
 
-            if (numTickets >= lottery.getMinParticipants()) {
+            this.payoutWinners(lottery, ticketMap);
 
-                this.payoutWinners(lottery, ticketMap);
+        } else {
 
-            } else {
-
-                this.refundTickets(lottery, ticketMap);
-
-            }
+            this.refundTickets(lottery, ticketMap);
 
         }
 
@@ -391,38 +387,42 @@ public class LotteryManager implements LotteryManagerInterface {
 
         long numTickets = ticketMap.size();
 
-        // Not Iterator nor Set supported (two data structures needed)
-        Map<Address, List<Ticket>> ownersTickets = new HashMap<Address, List<Ticket>>();
-        List<Address> owners = new ArrayList<Address>();
+        if (numTickets > 0) {
 
-        for (long i = 1; i <= numTickets; i++) {
+            // Not Iterator nor Set supported (two data structures needed)
+            Map<Address, List<Ticket>> ownersTickets = new HashMap<Address, List<Ticket>>();
+            List<Address> owners = new ArrayList<Address>();
 
-            Ticket ticket = ticketMap.get(i);
-            Address owner = ticket.getOwner();
-            List<Ticket> ownerTickets = ownersTickets.get(owner);
+            for (long i = 1; i <= numTickets; i++) {
 
-            if (ownerTickets == null) {
-                ownerTickets = new ArrayList<Ticket>();
-                ownersTickets.put(owner, ownerTickets);
+                Ticket ticket = ticketMap.get(i);
+                Address owner = ticket.getOwner();
+                List<Ticket> ownerTickets = ownersTickets.get(owner);
+
+                if (ownerTickets == null) {
+                    ownerTickets = new ArrayList<Ticket>();
+                    ownersTickets.put(owner, ownerTickets);
+                }
+
+                ownerTickets.add(ticket);
+
+                // List.contains() not supported
+                if (!Utils.contains(owners, owner)) {
+                    owners.add(owner);
+                }
             }
 
-            ownerTickets.add(ticket);
+            for (int i = 0; i < owners.size(); i++) {
 
-            // List.contains() not supported
-            if (!Utils.containsAddress(owners, owner)) {
-                owners.add(owner);
+                Address owner = owners.get(i);
+                List<Ticket> tickets = ownersTickets.get(owner);
+                BigInteger amount = lottery.getTicketPrice().multiply(BigInteger.valueOf(tickets.size()));
+                owner.transfer(amount);
+                this.decreasePot(lottery, amount);
+
+                emit(new TicketsRefundEvent(lottery.getId(), amount, tickets));
+
             }
-        }
-
-        for (int i = 0; i < owners.size(); i++) {
-
-            Address owner = owners.get(i);
-            List<Ticket> tickets = ownersTickets.get(owner);
-            BigInteger amount = lottery.getTicketPrice().multiply(BigInteger.valueOf(tickets.size()));
-            owner.transfer(amount);
-            this.decreasePot(lottery, amount);
-
-            emit(new TicketsRefundEvent(lottery.getId(), amount, tickets));
 
         }
 

@@ -1,15 +1,13 @@
 package com.gmail.amalcaraz89.lottery.func;
 
-import io.nuls.contract.sdk.Address;
-
 import java.util.List;
 
 public final class Utils {
 
-    public static boolean containsAddress(List<Address> list, Address o) {
+    public final static <T> boolean contains(List<T> list, T o) {
 
-        for (int i = 0; i< list.size(); i++) {
-            if (list.get(i) == o) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).equals(o)) {
                 return true;
             }
         }
