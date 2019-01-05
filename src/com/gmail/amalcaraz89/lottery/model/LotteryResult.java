@@ -45,8 +45,8 @@ public class LotteryResult {
     @Override
     public String toString() {
         return "{" +
-                "id: " + id +
-                ", winnerTickets: " + winnerTickets.toString() +
-                '}';
+                "\"id\": " + id +
+                ", \"winnerTickets\": " + winnerTickets.toString() +
+                "}";
     }
 }

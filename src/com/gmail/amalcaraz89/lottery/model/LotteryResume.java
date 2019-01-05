@@ -26,21 +26,21 @@ public class LotteryResume {
     public LotteryResume() {}
 
     public LotteryResume(LotteryResume obj) {
-        this.id = obj.getId();
-        this.title = obj.getTitle();
-        this.desc = obj.getDesc();
-        this.status = obj.getStatus();
-        this.minParticipants = obj.getMinParticipants();
-        this.startTime = obj.getStartTime();
-        this.endTime = obj.getEndTime();
-        this.initialPot = obj.getInitialPot();
-        this.currentPot = obj.getCurrentPot();
-        this.totalPot = obj.getTotalPot();
-        this.ticketPrice = obj.getTicketPrice();
-        this.secondPrizes = obj.isSecondPrizes();
-        this.creatorAddress = obj.getCreatorAddress();
-        this.supportAddress = obj.getSupportAddress();
-        this.supportPercentage = obj.getSupportPercentage();
+        this.id = obj.id;
+        this.title = obj.title;
+        this.desc = obj.desc;
+        this.status = obj.status;
+        this.minParticipants = obj.minParticipants;
+        this.startTime = obj.startTime;
+        this.endTime = obj.endTime;
+        this.initialPot = obj.initialPot;
+        this.currentPot = obj.currentPot;
+        this.totalPot = obj.totalPot;
+        this.ticketPrice = obj.ticketPrice;
+        this.secondPrizes = obj.secondPrizes;
+        this.creatorAddress = obj.creatorAddress;
+        this.supportAddress = obj.supportAddress;
+        this.supportPercentage = obj.supportPercentage;
     }
 
     public Long getId() {
@@ -169,21 +169,21 @@ public class LotteryResume {
     @Override
     public String toString() {
         return "{" +
-                "id: " + id +
-                ", title: \"" + title + "\"" +
-                ", desc: \"" + desc + "\"" +
-                ", status: " + status +
-                ", minParticipants: " + minParticipants +
-                ", startTime: " + startTime  +
-                ", endTime: " + endTime  +
-                ", initialPot: " + initialPot +
-                ", currentPot: " + currentPot +
-                ", totalPot: " + totalPot +
-                ", ticketPrice: " + ticketPrice +
-                ", secondPrizes: " + secondPrizes +
-                ", creatorAddress: \"" + creatorAddress + "\"" +
-                ", supportAddress: \"" + supportAddress + "\"" +
-                ", supportPercentage: " + supportPercentage +
-                '}';
+                "\"id\": " + id +
+                ", \"title\": \"" + title + "\"" +
+                ", \"desc\": \"" + desc + "\"" +
+                ", \"status\": " + status +
+                ", \"minParticipants\": " + minParticipants +
+                ", \"startTime\": " + startTime  +
+                ", \"endTime\": " + endTime  +
+                ", \"initialPot\": " + initialPot +
+                ", \"currentPot\": " + currentPot +
+                ", \"totalPot\": " + totalPot +
+                ", \"ticketPrice\": " + ticketPrice +
+                ", \"secondPrizes\": " + secondPrizes +
+                ", \"creatorAddress\": \"" + creatorAddress + "\"" +
+                ", \"supportAddress\": \"" + supportAddress + "\"" +
+                ", \"supportPercentage\": " + supportPercentage +
+                "}";
     }
 }

@@ -76,11 +76,11 @@ public class Ticket {
     @Override
     public String toString() {
         return "{" +
-                "id: " + id +
-                ", owner: \"" + owner + "\"" +
-                ", prize: " + prize +
-                ", prizeAmount: " + prizeAmount +
-                '}';
+                "\"id\": " + id +
+                ", \"owner\": \"" + owner + "\"" +
+                ", \"prize\": " + prize +
+                ", \"prizeAmount\": " + prizeAmount +
+                "}";
     }
 
 }

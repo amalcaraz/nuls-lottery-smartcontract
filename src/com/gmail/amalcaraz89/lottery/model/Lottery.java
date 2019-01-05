@@ -48,22 +48,22 @@ public class Lottery extends LotteryResume {
     @Override
     public String toString() {
         return "{" +
-                "id: " + id +
-                ", title: \"" + title + "\"" +
-                ", desc: \"" + desc + "\"" +
-                ", status: " + status +
-                ", minParticipants: " + minParticipants +
-                ", startTime: " + startTime  +
-                ", endTime: " + endTime +
-                ", initialPot: " + initialPot +
-                ", currentPot: " + currentPot +
-                ", totalPot: " + totalPot +
-                ", ticketPrice: " + ticketPrice +
-                ", secondPrizes: " + secondPrizes +
-                ", creatorAddress: \"" + creatorAddress + "\"" +
-                ", supportAddress: \"" + supportAddress + "\"" +
-                ", supportPercentage: " + supportPercentage +
-                ", ticketMap: " + ticketMap.toString() +
-                '}';
+                "\"id\": " + id +
+                ", \"title\": \"" + title + "\"" +
+                ", \"desc\": \"" + desc + "\"" +
+                ", \"status\": " + status +
+                ", \"minParticipants\": " + minParticipants +
+                ", \"startTime\": " + startTime  +
+                ", \"endTime\": " + endTime +
+                ", \"initialPot\": " + initialPot +
+                ", \"currentPot\": " + currentPot +
+                ", \"totalPot\": " + totalPot +
+                ", \"ticketPrice\": " + ticketPrice +
+                ", \"secondPrizes\": " + secondPrizes +
+                ", \"creatorAddress\": \"" + creatorAddress + "\"" +
+                ", \"supportAddress\": \"" + supportAddress + "\"" +
+                ", \"supportPercentage\": " + supportPercentage +
+                ", \"ticketMap\": " + ticketMap.toString() +
+                "}";
     }
 }

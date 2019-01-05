@@ -58,7 +58,7 @@ public class LotteryManager implements LotteryManagerInterface {
         lottery.setEndTime(endTime);
         lottery.setSecondPrizes(secondPrizes);
         lottery.setCreatorAddress(creatorAddress);
-        lottery.setTicketMap(new HashMap<Long, Ticket>());
+        lottery.setTicketMap(new CustomMap<Long, Ticket>());
 
         if (supportAddress != null) {
 
