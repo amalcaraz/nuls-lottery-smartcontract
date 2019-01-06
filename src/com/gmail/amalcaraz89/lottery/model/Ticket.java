@@ -77,7 +77,7 @@ public class Ticket {
     public String toString() {
         return "{" +
                 "\"id\": " + id +
-                ", \"owner\": \"" + owner + "\"" +
+                ", \"owner\": " + (owner != null ? ("\"" + owner + "\"") : "\"\"") +
                 ", \"prize\": " + prize +
                 ", \"prizeAmount\": " + prizeAmount +
                 "}";

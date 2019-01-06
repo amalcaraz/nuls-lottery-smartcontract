@@ -49,8 +49,8 @@ public class Lottery extends LotteryResume {
     public String toString() {
         return "{" +
                 "\"id\": " + id +
-                ", \"title\": \"" + title + "\"" +
-                ", \"desc\": \"" + desc + "\"" +
+                ", \"title\": " + (title != null ? ("\"" + title + "\"") : "\"\"") +
+                ", \"desc\": " + (desc != null ? ("\"" + desc + "\"") : "\"\"") +
                 ", \"status\": " + status +
                 ", \"minParticipants\": " + minParticipants +
                 ", \"startTime\": " + startTime  +
@@ -60,8 +60,8 @@ public class Lottery extends LotteryResume {
                 ", \"totalPot\": " + totalPot +
                 ", \"ticketPrice\": " + ticketPrice +
                 ", \"secondPrizes\": " + secondPrizes +
-                ", \"creatorAddress\": \"" + creatorAddress + "\"" +
-                ", \"supportAddress\": \"" + supportAddress + "\"" +
+                ", \"creatorAddress\": " + (creatorAddress != null ? ("\"" + creatorAddress + "\"") : "\"\"") +
+                ", \"supportAddress\": " + (supportAddress != null ? ("\"" + supportAddress + "\"") : "\"\"") +
                 ", \"supportPercentage\": " + supportPercentage +
                 ", \"ticketMap\": " + ticketMap.toString() +
                 "}";
