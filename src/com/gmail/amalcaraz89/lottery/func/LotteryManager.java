@@ -343,6 +343,8 @@ public class LotteryManager implements LotteryManagerInterface {
 
         if (lottery.isSecondPrizes()) {
 
+            totalPot = lottery.getCurrentPot();
+
             long secondWinnerIndex = ((winnerIndex ^ ((1L << 48) - 1)) % numTickets) + 1;
             if (secondWinnerIndex == winnerIndex) {
                 secondWinnerIndex = ((winnerIndex + 1) % numTickets) + 1;
