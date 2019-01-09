@@ -27,6 +27,7 @@ public class LotteryManager implements LotteryManagerInterface {
 
     private static long rescueMinWait = 1000L * 60 * 60 * 24 * 30;
     private static int defaultMinParticipants = 5;
+    private static BigInteger minTicketPrize = BigInteger.valueOf(1000000);
     private Address owner;
     private Map<Long, Lottery> lotteryMap = new HashMap<Long, Lottery>();
 
@@ -40,7 +41,7 @@ public class LotteryManager implements LotteryManagerInterface {
 
         require(title != null, "title can not be empty");
         require(desc != null, "desc can not be empty");
-        require(ticketPrice != null && ticketPrice.compareTo(BigInteger.ZERO) > 0, "ticketPrice can not be empty or 0");
+        require(ticketPrice != null && ticketPrice.compareTo(minTicketPrize) >= 0, "ticketPrice can not be empty or less than 0.01");
         require(startTime <= endTime, "start time should be lower than end time");
         require(endTime >= Block.timestamp(), "end time cant't be lower than now");
         require(minParticipants >= defaultMinParticipants, "Minimum participants is 5");
@@ -61,7 +62,6 @@ public class LotteryManager implements LotteryManagerInterface {
         lottery.setTicketMap(new CustomMap<Long, Ticket>());
 
         if (supportAddress != null) {
-
             require(supportPercentage > 0 && supportPercentage <= 50, "suppPercentage should be greater than 0 and less than 50");
 
             lottery.setSupportAddress(supportAddress);
@@ -271,6 +271,8 @@ public class LotteryManager implements LotteryManagerInterface {
             ticketMap.put(i, ticket);
             tickets.add(ticket);
         }
+
+        lottery.setTicketsCount(lottery.getTicketsCount() + numTickets);
 
         emit(new TicketsBoughtEvent(lottery.getId(), tickets));
 

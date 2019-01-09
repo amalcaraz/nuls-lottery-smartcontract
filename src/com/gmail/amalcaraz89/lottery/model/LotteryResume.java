@@ -22,6 +22,7 @@ public class LotteryResume {
     protected Address creatorAddress;
     protected Address supportAddress;
     protected int supportPercentage;
+    protected int ticketsCount;
 
     public LotteryResume() {}
 
@@ -41,6 +42,7 @@ public class LotteryResume {
         this.creatorAddress = obj.creatorAddress;
         this.supportAddress = obj.supportAddress;
         this.supportPercentage = obj.supportPercentage;
+        this.ticketsCount = obj.ticketsCount;
     }
 
     public Long getId() {
@@ -119,6 +121,10 @@ public class LotteryResume {
 
     public void setSupportPercentage(int supportPercentage) { this.supportPercentage = supportPercentage; }
 
+    public int getTicketsCount() { return ticketsCount; }
+
+    public void setTicketsCount(int ticketsCount) { this.ticketsCount = ticketsCount; }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -141,6 +147,7 @@ public class LotteryResume {
         if (creatorAddress != null ? creatorAddress.equals(that.creatorAddress) : that.creatorAddress == null) return false;
         if (supportAddress != null ? supportAddress.equals(that.supportAddress) : that.supportAddress == null) return false;
         if (supportPercentage != that.supportPercentage) return false;
+        if (ticketsCount != that.ticketsCount) return false;
 
         return true;
     }
@@ -162,6 +169,7 @@ public class LotteryResume {
         result = 31 * result + (creatorAddress != null ? creatorAddress.hashCode() : 0);
         result = 31 * result + (supportAddress != null ? supportAddress.hashCode() : 0);
         result = 31 * result + supportPercentage;
+        result = 31 * result + ticketsCount;
 
         return result;
     }
@@ -184,6 +192,7 @@ public class LotteryResume {
                 ", \"creatorAddress\": " + (creatorAddress != null ? ("\"" + creatorAddress + "\"") : "\"\"") +
                 ", \"supportAddress\": " + (supportAddress != null ? ("\"" + supportAddress + "\"") : "\"\"") +
                 ", \"supportPercentage\": " + supportPercentage +
+                ", \"ticketsCount\": " + ticketsCount +
                 "}";
     }
 }

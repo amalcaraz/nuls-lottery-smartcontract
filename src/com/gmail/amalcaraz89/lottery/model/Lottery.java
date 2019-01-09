@@ -32,6 +32,7 @@ public class Lottery extends LotteryResume {
         if (creatorAddress != null ? creatorAddress.equals(that.creatorAddress) : that.creatorAddress == null) return false;
         if (supportAddress != null ? supportAddress.equals(that.supportAddress) : that.supportAddress == null) return false;
         if (supportPercentage != that.supportPercentage) return false;
+        if (ticketsCount != that.ticketsCount) return false;
         if (ticketMap != null ? ticketMap.equals(that.ticketMap) : that.ticketMap == null) return false;
 
         return true;
@@ -63,6 +64,7 @@ public class Lottery extends LotteryResume {
                 ", \"creatorAddress\": " + (creatorAddress != null ? ("\"" + creatorAddress + "\"") : "\"\"") +
                 ", \"supportAddress\": " + (supportAddress != null ? ("\"" + supportAddress + "\"") : "\"\"") +
                 ", \"supportPercentage\": " + supportPercentage +
+                ", \"ticketsCount\": " + ticketsCount +
                 ", \"ticketMap\": " + ticketMap.toString() +
                 "}";
     }
