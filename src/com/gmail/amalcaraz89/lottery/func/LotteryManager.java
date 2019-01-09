@@ -89,7 +89,7 @@ public class LotteryManager implements LotteryManagerInterface {
         this.updateStatus(lottery);
 
         require(lottery.getStatus() != LotteryStatus.WAITING, "This lottery is not open yet");
-        require(lottery.getStatus() != LotteryStatus.CLOSE, "This lottery is already closed");
+        require(lottery.getStatus() != LotteryStatus.CLOSED, "This lottery is already closed");
 
         BigInteger ticketPrice = lottery.getTicketPrice();
 
@@ -119,13 +119,13 @@ public class LotteryManager implements LotteryManagerInterface {
 
         Lottery lottery = this.getLotteryById(lotteryId);
 
-        // Require transition from WAITING or OPEN to CLOSE
+        // Require transition from WAITING or OPEN to CLOSED
 
-        require(lottery.getStatus() != LotteryStatus.CLOSE, "This lottery is already closed");
+        require(lottery.getStatus() != LotteryStatus.CLOSED, "This lottery is already closed");
 
         this.updateStatus(lottery);
 
-        require(lottery.getStatus() == LotteryStatus.CLOSE, "This lottery is not closed yet");
+        require(lottery.getStatus() == LotteryStatus.CLOSED, "This lottery is not closed yet");
 
         this.resolveWinners(lottery);
 
@@ -150,7 +150,7 @@ public class LotteryManager implements LotteryManagerInterface {
 
         Lottery lottery = this.getLotteryById(lotteryId);
 
-        require(lottery.getStatus() == LotteryStatus.CLOSE, "This lottery is not closed yet");
+        require(lottery.getStatus() == LotteryStatus.CLOSED, "This lottery is not closed yet");
 
         LotteryResult result = new LotteryResult();
         result.setId(lotteryId);
@@ -238,7 +238,7 @@ public class LotteryManager implements LotteryManagerInterface {
 
         Lottery lottery = this.getLotteryById(lotteryId);
 
-        require(lottery.getStatus() == LotteryStatus.CLOSE, "This lottery is not closed yet");
+        require(lottery.getStatus() == LotteryStatus.CLOSED, "This lottery is not closed yet");
         require(Block.timestamp() >= (lottery.getEndTime() + rescueMinWait), "Can't rescue balance till time = " + (lottery.getEndTime() + rescueMinWait));
 
         BigInteger pot = lottery.getCurrentPot();
@@ -286,9 +286,9 @@ public class LotteryManager implements LotteryManagerInterface {
 
         }
 
-        if (lottery.getEndTime() <= Block.timestamp() && lottery.getStatus() != LotteryStatus.CLOSE) {
+        if (lottery.getEndTime() <= Block.timestamp() && lottery.getStatus() != LotteryStatus.CLOSED) {
 
-            lottery.setStatus(LotteryStatus.CLOSE);
+            lottery.setStatus(LotteryStatus.CLOSED);
 
         }
 
