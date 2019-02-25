@@ -2,7 +2,7 @@ package com.gmail.amalcaraz89.lottery.func;
 
 import com.gmail.amalcaraz89.lottery.model.Lottery;
 import com.gmail.amalcaraz89.lottery.model.LotteryResult;
-import com.gmail.amalcaraz89.lottery.model.LotteryResume;
+import com.gmail.amalcaraz89.lottery.model.LotterySummary;
 import com.gmail.amalcaraz89.lottery.model.Ticket;
 import io.nuls.contract.sdk.Address;
 
@@ -20,7 +20,7 @@ public interface LotteryManagerInterface {
 
     void rescueNuls(long lotteryId, Address receiver);
 
-    List<LotteryResume> getLotteryList();
+    List<LotterySummary> getLotteryList();
 
     LotteryResult getLotteryResult(long lotteryId);
 

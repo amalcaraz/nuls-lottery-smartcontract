@@ -5,7 +5,9 @@ import io.nuls.contract.sdk.Address;
 
 import java.math.BigInteger;
 
-public class LotteryResume {
+import static com.gmail.amalcaraz89.lottery.func.Utils.prepareJSONString;
+
+public class LotterySummary {
 
     protected Long id;
     protected String title;
@@ -24,9 +26,9 @@ public class LotteryResume {
     protected int supportPercentage;
     protected int ticketsCount;
 
-    public LotteryResume() {}
+    public LotterySummary() {}
 
-    public LotteryResume(LotteryResume obj) {
+    public LotterySummary(LotterySummary obj) {
         this.id = obj.id;
         this.title = obj.title;
         this.desc = obj.desc;
@@ -130,7 +132,7 @@ public class LotteryResume {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        LotteryResume that = (LotteryResume) o;
+        LotterySummary that = (LotterySummary) o;
 
         if (status != that.status) return false;
         if (id != null ? !id.equals(that.id) : that.id != null) return false;
@@ -178,8 +180,8 @@ public class LotteryResume {
     public String toString() {
         return "{" +
                 "\"id\": " + id +
-                ", \"title\": " + (title != null ? ("\"" + title + "\"") : "\"\"") +
-                ", \"desc\": " + (desc != null ? ("\"" + desc + "\"") : "\"\"") +
+                ", \"title\": " + prepareJSONString(title) +
+                ", \"desc\": " + prepareJSONString(desc) +
                 ", \"status\": " + status +
                 ", \"minParticipants\": " + minParticipants +
                 ", \"startTime\": " + startTime  +
@@ -189,8 +191,8 @@ public class LotteryResume {
                 ", \"totalPot\": " + totalPot +
                 ", \"ticketPrice\": " + ticketPrice +
                 ", \"secondPrizes\": " + secondPrizes +
-                ", \"creatorAddress\": " + (creatorAddress != null ? ("\"" + creatorAddress + "\"") : "\"\"") +
-                ", \"supportAddress\": " + (supportAddress != null ? ("\"" + supportAddress + "\"") : "\"\"") +
+                ", \"creatorAddress\": " + prepareJSONString(creatorAddress) +
+                ", \"supportAddress\": " + prepareJSONString(supportAddress) +
                 ", \"supportPercentage\": " + supportPercentage +
                 ", \"ticketsCount\": " + ticketsCount +
                 "}";

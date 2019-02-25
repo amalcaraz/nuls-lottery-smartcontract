@@ -2,7 +2,9 @@ package com.gmail.amalcaraz89.lottery.model;
 
 import java.util.Map;
 
-public class Lottery extends LotteryResume {
+import static com.gmail.amalcaraz89.lottery.func.Utils.prepareJSONString;
+
+public class Lottery extends LotterySummary {
 
     private Map<Long, Ticket> ticketMap;
 
@@ -50,8 +52,8 @@ public class Lottery extends LotteryResume {
     public String toString() {
         return "{" +
                 "\"id\": " + id +
-                ", \"title\": " + (title != null ? ("\"" + title + "\"") : "\"\"") +
-                ", \"desc\": " + (desc != null ? ("\"" + desc + "\"") : "\"\"") +
+                ", \"title\": " + prepareJSONString(title) +
+                ", \"desc\": " + prepareJSONString(desc) +
                 ", \"status\": " + status +
                 ", \"minParticipants\": " + minParticipants +
                 ", \"startTime\": " + startTime  +
@@ -61,8 +63,8 @@ public class Lottery extends LotteryResume {
                 ", \"totalPot\": " + totalPot +
                 ", \"ticketPrice\": " + ticketPrice +
                 ", \"secondPrizes\": " + secondPrizes +
-                ", \"creatorAddress\": " + (creatorAddress != null ? ("\"" + creatorAddress + "\"") : "\"\"") +
-                ", \"supportAddress\": " + (supportAddress != null ? ("\"" + supportAddress + "\"") : "\"\"") +
+                ", \"creatorAddress\": " + prepareJSONString(creatorAddress) +
+                ", \"supportAddress\": " + prepareJSONString(supportAddress) +
                 ", \"supportPercentage\": " + supportPercentage +
                 ", \"ticketsCount\": " + ticketsCount +
                 ", \"ticketMap\": " + ticketMap.toString() +

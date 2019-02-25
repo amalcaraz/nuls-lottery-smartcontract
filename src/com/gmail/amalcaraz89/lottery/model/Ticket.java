@@ -4,6 +4,8 @@ import io.nuls.contract.sdk.Address;
 
 import java.math.BigInteger;
 
+import static com.gmail.amalcaraz89.lottery.func.Utils.prepareJSONString;
+
 public class Ticket {
 
     private Long id;
@@ -77,7 +79,7 @@ public class Ticket {
     public String toString() {
         return "{" +
                 "\"id\": " + id +
-                ", \"owner\": " + (owner != null ? ("\"" + owner + "\"") : "\"\"") +
+                ", \"owner\": " + prepareJSONString(owner) +
                 ", \"prize\": " + prize +
                 ", \"prizeAmount\": " + prizeAmount +
                 "}";

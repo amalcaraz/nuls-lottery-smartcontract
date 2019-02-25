@@ -15,4 +15,16 @@ public final class Utils {
 
     }
 
+    public final static String escapeJSONString(String str) {
+
+        return str.replaceAll("\n", "\\\\n").replaceAll("\r", "\\\\r").replaceAll("\t", "\\\\t").replaceAll("\f", "\\\\f").replaceAll("\"","\\\\\"");
+
+    }
+
+    public final static String prepareJSONString(Object value) {
+
+        return (value != null ? ("\"" + value + "\"") : "\"\"");
+
+    }
+
 }

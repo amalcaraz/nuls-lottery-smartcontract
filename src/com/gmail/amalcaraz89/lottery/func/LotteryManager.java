@@ -8,7 +8,7 @@ import com.gmail.amalcaraz89.lottery.event.SupportTransferEvent;
 import com.gmail.amalcaraz89.lottery.event.TicketsBoughtEvent;
 import com.gmail.amalcaraz89.lottery.model.Lottery;
 import com.gmail.amalcaraz89.lottery.model.LotteryResult;
-import com.gmail.amalcaraz89.lottery.model.LotteryResume;
+import com.gmail.amalcaraz89.lottery.model.LotterySummary;
 import com.gmail.amalcaraz89.lottery.model.Ticket;
 import io.nuls.contract.sdk.Address;
 import io.nuls.contract.sdk.Block;
@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.gmail.amalcaraz89.lottery.func.Utils.escapeJSONString;
 import static io.nuls.contract.sdk.Utils.emit;
 import static io.nuls.contract.sdk.Utils.require;
 
@@ -51,8 +52,8 @@ public class LotteryManager implements LotteryManagerInterface {
         Lottery lottery = new Lottery();
 
         lottery.setId(lotteryId);
-        lottery.setTitle(title);
-        lottery.setDesc(desc);
+        lottery.setTitle(escapeJSONString(title));
+        lottery.setDesc(escapeJSONString(desc));
         lottery.setTicketPrice(ticketPrice);
         lottery.setMinParticipants(minParticipants);
         lottery.setStartTime(startTime);
@@ -132,17 +133,17 @@ public class LotteryManager implements LotteryManagerInterface {
     }
 
     @Override
-    public List<LotteryResume> getLotteryList() {
+    public List<LotterySummary> getLotteryList() {
 
-        List<LotteryResume> lotteryResumes = new ArrayList<LotteryResume>();
+        List<LotterySummary> lotterySummaries = new ArrayList<LotterySummary>();
 
         for (long i = 1; i <= this.lotteryMap.size(); i++) {
             Lottery lottery = this.lotteryMap.get(i);
-            LotteryResume resume = new LotteryResume(lottery);
-            lotteryResumes.add(resume);
+            LotterySummary resume = new LotterySummary(lottery);
+            lotterySummaries.add(resume);
         }
 
-        return lotteryResumes;
+        return lotterySummaries;
     }
 
     @Override
