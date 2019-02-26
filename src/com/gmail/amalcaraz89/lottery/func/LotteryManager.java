@@ -23,6 +23,8 @@ import java.util.Map;
 import static com.gmail.amalcaraz89.lottery.func.Utils.escapeJSONString;
 import static io.nuls.contract.sdk.Utils.emit;
 import static io.nuls.contract.sdk.Utils.require;
+import static io.nuls.contract.sdk.Utils.getRandomSeed;
+import static io.nuls.contract.sdk.Utils.pseudoRandom;
 
 public class LotteryManager implements LotteryManagerInterface {
 
@@ -323,8 +325,8 @@ public class LotteryManager implements LotteryManagerInterface {
 
         long numTickets = ticketMap.size();
 
-        long seed = (numTickets << 32) + numTickets + 3;
-        long winnerIndex = (long) (CustomMath.random(seed) * numTickets) + 1;
+        BigInteger seed = getRandomSeed(Block.newestBlockHeader().getHeight(), 20);
+        long winnerIndex = (long) (pseudoRandom(seed.longValue()) * numTickets) + 1;
         Ticket ticket = ticketMap.get(winnerIndex);
 
         BigInteger totalPot = lottery.getCurrentPot();
