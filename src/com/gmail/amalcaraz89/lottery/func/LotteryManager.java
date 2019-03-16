@@ -32,7 +32,7 @@ public class LotteryManager implements LotteryManagerInterface {
     private static int defaultMinParticipants = 5;
     private static BigInteger minTicketPrize = BigInteger.valueOf(1000000);
     private Address owner;
-    private Map<Long, Lottery> lotteryMap = new HashMap<Long, Lottery>();
+    private Map<Long, Lottery> lotteryMap = new HashMap<>();
 
     public LotteryManager(Address owner) {
         this.owner = owner;
@@ -137,7 +137,7 @@ public class LotteryManager implements LotteryManagerInterface {
     @Override
     public List<LotterySummary> getLotteryList() {
 
-        List<LotterySummary> lotterySummaries = new ArrayList<LotterySummary>();
+        List<LotterySummary> lotterySummaries = new ArrayList<>();
 
         for (long i = 1; i <= this.lotteryMap.size(); i++) {
             Lottery lottery = this.lotteryMap.get(i);
@@ -160,7 +160,7 @@ public class LotteryManager implements LotteryManagerInterface {
 
         Map<Long, Ticket> ticketMap = lottery.getTicketMap();
 
-        List<Ticket> tickets = new ArrayList<Ticket>();
+        List<Ticket> tickets = new ArrayList<>();
 
         for (long i = 1; i <= ticketMap.size(); i++) {
             Ticket t = ticketMap.get(i);
@@ -188,7 +188,7 @@ public class LotteryManager implements LotteryManagerInterface {
 
         Map<Long, Ticket> ticketMap = lottery.getTicketMap();
 
-        List<Ticket> tickets = new ArrayList<Ticket>();
+        List<Ticket> tickets = new ArrayList<>();
 
         for (long i = 1; i <= ticketMap.size(); i++) {
             tickets.add(ticketMap.get(i));
@@ -206,7 +206,7 @@ public class LotteryManager implements LotteryManagerInterface {
 
         Map<Long, Ticket> ticketMap = lottery.getTicketMap();
 
-        List<Ticket> tickets = new ArrayList<Ticket>();
+        List<Ticket> tickets = new ArrayList<>();
 
         for (long i = 1; i <= ticketMap.size(); i++) {
             Ticket t = ticketMap.get(i);
@@ -265,7 +265,7 @@ public class LotteryManager implements LotteryManagerInterface {
     private void generateTickets(Lottery lottery, Address address, int numTickets) {
 
         Map<Long, Ticket> ticketMap = lottery.getTicketMap();
-        List<Ticket> tickets = new ArrayList<Ticket>();
+        List<Ticket> tickets = new ArrayList<>();
 
         int next = ticketMap.size() + 1;
 
@@ -397,8 +397,8 @@ public class LotteryManager implements LotteryManagerInterface {
         if (numTickets > 0) {
 
             // Not Iterator nor Set supported (two data structures needed)
-            Map<Address, List<Ticket>> ownersTickets = new HashMap<Address, List<Ticket>>();
-            List<Address> owners = new ArrayList<Address>();
+            Map<Address, List<Ticket>> ownersTickets = new HashMap<>();
+            List<Address> owners = new ArrayList<>();
 
             for (long i = 1; i <= numTickets; i++) {
 
@@ -407,7 +407,7 @@ public class LotteryManager implements LotteryManagerInterface {
                 List<Ticket> ownerTickets = ownersTickets.get(owner);
 
                 if (ownerTickets == null) {
-                    ownerTickets = new ArrayList<Ticket>();
+                    ownerTickets = new ArrayList<>();
                     ownersTickets.put(owner, ownerTickets);
                 }
 
@@ -419,9 +419,8 @@ public class LotteryManager implements LotteryManagerInterface {
                 }
             }
 
-            for (int i = 0; i < owners.size(); i++) {
+            for (Address owner : owners) {
 
-                Address owner = owners.get(i);
                 List<Ticket> tickets = ownersTickets.get(owner);
                 BigInteger amount = lottery.getTicketPrice().multiply(BigInteger.valueOf(tickets.size()));
                 owner.transfer(amount);
